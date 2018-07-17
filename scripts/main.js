@@ -21,25 +21,6 @@
 
  }
 
-const api = new DogApi();
-// First test
-console.log(api.baseUrl) // The base url
-
-// // Second test
-
-
-
-api.getBreed().then(res => console.log(res));
-
-// // Third test
-api.getBreedImage('african').then(res => console.log(res));
-
-// Forth test
-api.getBreeds().then(result => {
-  console.log(Array.isArray(result)) // true
-  console.log(result) // An array of all the keys in the object that we recieved before
-})
-
 class DogBrowserView {
     constructor(selector){
       this.root = document.body.querySelector(selector);
@@ -48,19 +29,27 @@ class DogBrowserView {
     render(htmlString){
       this.root.innerHTML = htmlString;
     }
+    on(eventName, selector, callback){
+     this.root.addEventListener(eventName, event => {
+       // Exit, don't runt the function if the target doesn't match the selector
+       if(!event.target.matches(selector)) return;
+
+       callback(event);
+     });
+   }
 
 }
 
-    const view = new DogBrowserView();
+    const view = new DogBrowserView('#main');
 
     // 1st test
     console.log(view.root) // --> An htmls element for the root of our view
 
     // 2nd test
-    // view.render('<p>test</p>');
-    // console.log(view.root.innerHTML === '<p>test</p>') // true
+    view.render('<p>test</p>');
+    console.log(view.root.innerHTML === '<p>test</p>') // true
 
     // 3rd test
-    // view.on('click', 'p', event => console.log(event.target)) // Element object for the clicked paragraph
+    view.on('click', 'p', event => console.log(event.target)) // Element object for the clicked paragraph
 
 })();
