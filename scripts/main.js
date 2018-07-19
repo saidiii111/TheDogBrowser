@@ -7,16 +7,16 @@
         }
         // second task
         getBreed(){
-            return $.ajax(`${this.baseUrl}breeds/list/all`).then(res =>  res.message);
+            return $.ajax(`${this.baseUrl}breeds/list/all`).then(res => Object.keys(res.message));
         }
         // third task
-        getBreedImage(){
-            return $.ajax(`${this.baseUrl}breed/african/images/random`).then(res => res.message);
+        getBreedImage(breeds){
+            return $.ajax(`${this.baseUrl}breed/${breeds}/images/random`).then(res => res.message);
         }
         // forth task
-        getBreeds(){
-            return $.ajax(`${this.baseUrl}breeds/list/all`).then(result => Object.keys(result.message));
-        }
+        // getBreeds(){
+        //     return $.ajax(`${this.baseUrl}breeds/list/all`).then(result => Object.keys(result.message));
+        // }
 
 
     }
@@ -36,41 +36,48 @@
         on(eventName, selector, callback){
             // adding event listener to the main element
             this.root.addEventListener(eventName, event => {
-                // Exit, don't runt the function if the target doesn't match the selector
+                // Exit, don't run the function if the target doesn't match the selector
                 if(!event.target.matches(selector)) return;
                 // if its true run it
                 callback(event);
             });
         }
-        breedListTemplate(buttons){
-            const button = buttons.map(breed => `
-    <button type="button" class="list-group-item list-group-item-action">${breed}</button>`);
+        breedListTemplate(breeds){
+            const breedList = breeds.map(list =>`
+    <button type="button" data-call=${list} class="bton list-group-item list-group-item-action">${list}</button>`).join('');
             return `<div class="list-group">
-  ${button}
+  ${breedList}
  </div>`;
         }
         dogImageTemplate(images){
-            return `<header>
-  <button type="button" class="btn btn-primary back-button">Go Back</button>
- </header>
-<section>
-  <img class="img-fluid" src=${images}>
- </section>`;
+            return`
+            <header><button type="button" data-back= ${images} class="btn carousel-caption carousel slide btn-primary back-button">Go Back</button></header><section><img class="img-fluid" src="${images}"></section>`;
         }
     }
-    // declare the view with new keyWord which we can use it on the class
-    const view = new DogBrowserView('#main');
-    //
-    // // 1st test
-    // console.log(view.root) // --> An htmls element for the root of our view
-    //
-    // // 2nd test
-    // view.render('<p>test</p><p>test5</p><p>test0</p>');
-    // console.log(view.root.innerHTML === '<p>test</p>') // true
-    //
-    // // 3rd test
-    // view.on('click', 'p', event => console.log(event.target)) // Element object for the clicked paragraph
+    // declare the viewres with new keyWord which we can use it on the class
+const view = new DogBrowserView('#main');
 
-    // console.log(view.breedListTemplate(['Hello', 'Hi','word']));
-    console.log(view.dogImageTemplate('http://via.placeholder.com/350x150'));
+    const api = new DogApi();
+    // creating a method to let the photo appear
+    api.getBreed().then(res => {
+        view.render(view.breedListTemplate(res));
+    });
+    // adding event using on method which we created before
+    view.on('click', '.bton', event => {
+        event.preventDefault();
+        // declare breed and assign it to event with data attribute..
+        const breed = event.target.dataset.call;
+        api.getBreedImage(breed).then(res => {
+            view.render(view.dogImageTemplate(res));
+        });
+    });
+// the same methode before but this one to let us go back from photo to the breedListTemplate
+view.on('click', '.back-button', event => {
+  event.preventDefault();
+  const back = event.target.dataset.back;
+api.getBreed(back).then(res => {
+  view.render(view.breedListTemplate(res));
+});
+});
+
 })();
